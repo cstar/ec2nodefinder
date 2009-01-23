@@ -3,7 +3,7 @@
 {vsn, %VSN%}, 
 {modules, %MODULES%},
 {registered,[ec2nodefinder]}, 
-{applications, [kernel,stdlib]}, 
+{applications, [kernel,stdlib, inets]}, 
 {mod, {ec2nodefinder,[]}},
 {start_phases, []},
 {env, [

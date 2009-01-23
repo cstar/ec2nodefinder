@@ -207,10 +207,16 @@ desc "Compile all project"
 task :compile => [ :erlang_applications ]
 
 desc "Runs application"
-task :run, :name, :node, :needs => [ :compile ] do |t,args|
+task :run, :node, :needs => [ :compile ] do |t,args|
   node = args.node || "node"
   paths = ERL_DIRECTORIES.join(" -pa ")
-  sh "erl -boot start_sasl -pa #{paths} -sname #{args.node} -s #{args.name} start "
+  bootfiles = ERL_BOOT_FILES.pathmap("%X")
+  if bootfiles.size == 1
+     name = bootfiles.pathmap("%X")[0]
+  else
+    name = bootfiles.select {|v| v["#{args.name}"]} [0]
+  end
+  sh "erl -boot #{name} -pa #{paths} -sname #{node} -s start "
 end
 
 desc "Sends release to S3 (presumably for deployment on EC2)"
