@@ -218,6 +218,12 @@ task :upload =>  [:erlang_releases] do |t|
   ERL_RELEASE_ARCHIVES.each do |r| send_to_s3(r) end
 end
 
+desc "Runs EUnit tests"
+task :tests => ERL_BEAM do |t|
+   script = "scripts/run_tests"
+   sh "#{ERL_TOP}/bin/escript #{script} #{ERL_DIRECTORIES}"
+end
+
 def conn
   @conn ||= S3::AWSAuthConnection.new(AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, S3_SSL)
 end
