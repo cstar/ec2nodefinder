@@ -1,6 +1,6 @@
 # Copyright 2008-2009 Nicolas Charpentier
 # Distributed under BSD licence
-
+require 'scripts/s3'
 def extract_version_information(file, type)
   informations = []
   IO.foreach(file) { |line|
@@ -206,8 +206,30 @@ end
 desc "Compile all project"
 task :compile => [ :erlang_applications ]
 
+desc "Runs application"
 task :run, :name, :node, :needs => [ :compile ] do |t,args|
   node = args.node || "node"
   paths = ERL_DIRECTORIES.join(" -pa ")
   sh "erl -boot start_sasl -pa #{paths} -sname #{args.node} -s #{args.name} start "
 end
+
+desc "Sends release to S3 (presumably for deployment on EC2)"
+task :upload =>  [:erlang_releases] do |t|
+  ERL_RELEASE_ARCHIVES.each do |r| send_to_s3(r) end
+end
+
+def conn
+  @conn ||= S3::AWSAuthConnection.new(AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, S3_SSL)
+end
+
+def send_to_s3(name)
+  puts "sending release #{name} to S3"
+  # put file with default 'private' ACL
+  bytes = nil
+  File.open(name, "rb") { |f| bytes = f.read }  
+  #set the acl as private       
+  headers =  { 'x-amz-acl' => 'private', 'Content-Length' =>  FileTest.size(name).to_s }
+  response =  conn.put(BUCKET, name.split('/').last, bytes, headers).http_response.message
+  puts "finished sending #{name} to S3"
+end
+

@@ -5,7 +5,7 @@ require 'rake'
 require 'rake/clean'
 require 'rake/loaders/makefile'
 
-require 'erlang.rb'
+require 'scripts/erlang.rb'
 
 
 task :default => [:erlang_releases]
