@@ -224,6 +224,18 @@ task :tests => ERL_BEAM do |t|
    sh "#{ERL_TOP}/bin/escript #{script} #{ERL_DIRECTORIES}"
 end
 
+def erlang_home
+  @erlang_home||=IO.popen("erl -noinput -noshell -eval 'io:format(code:root_dir()).' -s init stop").readlines[0] 
+end
+
+desc "Installs in local erl repository : #{erlang_home}"
+task :install =>  [:compile] do |t|
+  FileList.new('lib/*').each do |dir|
+    vsn = extract_version_information("#{dir}/vsn.config","vsn").gsub("\"","")
+    puts "cp -R #{dir} #{erlang_home}/#{dir}-#{vsn}"
+  end
+end
+
 def conn
   @conn ||= S3::AWSAuthConnection.new(AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, S3_SSL)
 end
