@@ -2,6 +2,9 @@
 
 This is a fork from the Dukes of Erl's ec2nodefinder : http://dukesoferl.blogspot.com/2008/02/automatic-node-discovery.html
 
+= License =
+New BSD license (http://www.opensource.org/licenses/bsd-license.php) as the original code is.
+
 = Building =
 
 You need ruby 1.8.6 or 1.8.7, OTP R12B5 and rake on the building machine.
