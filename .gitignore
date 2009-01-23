@@ -1,0 +1,6 @@
+ebin
+erl_crash.dump
+.depend_erlang.mf
+distribs/
+*.boot
+*.script
