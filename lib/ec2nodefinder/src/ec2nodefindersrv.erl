@@ -4,7 +4,7 @@
 
 -module (ec2nodefindersrv).
 -behaviour (gen_server).
--export ([ start_link/6, discover/0 ]).
+-export ([ start_link/4, discover/0 ]).
 -export ([ init/1,
            handle_call/3,
            handle_cast/2,
@@ -14,26 +14,25 @@
 
 -record (state, { group,
                   ping_timeout,
-                  private_key,
-                  cert,
-                  ec2_home,
-                  java_home }).
+                  access,
+                  secret
+                  }).
+-define(APIVERSION, "2008-12-01").
+-define(ENDPOINT, "ec2.amazonaws.com").
 
 %-=====================================================================-
 %-                                Public                               -
 %-=====================================================================-
 
-start_link (Group, PingTimeout, PrivateKey, Cert, Ec2Home, JavaHome)
+start_link (Group, PingTimeout, Access, Secret)
   when is_list (Group),
        is_integer (PingTimeout),
-       is_list (PrivateKey),
-       is_list (Cert),
-       is_list (Ec2Home),
-       is_list (JavaHome) ->
+       is_list (Access),
+       is_list (Secret) ->
   gen_server:start_link 
     ({ local, ?MODULE }, 
      ?MODULE, 
-     [ Group, PingTimeout, PrivateKey, Cert, Ec2Home, JavaHome ], 
+     [ Group, PingTimeout, Access, Secret ], 
      []).
 
 discover () ->
@@ -43,19 +42,14 @@ discover () ->
 %-                         gen_server callbacks                        -
 %-=====================================================================-
 
-init ([ Group, PingTimeout, PrivateKey, Cert, Ec2Home, JavaHome ]) ->
+init ([ Group, PingTimeout, Access, Secret  ]) ->
   pong = net_adm:ping (node ()), % don't startup unless distributed
-
-  { ok, _ } = file:read_file_info (PrivateKey),
-  { ok, _ } = file:read_file_info (Cert),
 
   process_flag (trap_exit, true),
   State = #state{ group = Group,
                   ping_timeout = PingTimeout,
-                  private_key = PrivateKey,
-                  cert = Cert,
-                  ec2_home = Ec2Home,
-                  java_home = JavaHome },
+                  access = Access,
+                  secret = Secret },
   discover (State),
   { ok, State }.
 
@@ -94,62 +88,22 @@ collect (Key, Timeout) ->
   end.
 
 discover (State) ->
-  Command = "env EC2_HOME='" ++ shell_escape (State#state.ec2_home) ++ "' " ++
-            "JAVA_HOME='" ++ shell_escape (State#state.java_home) ++ "' " ++
-            shell_escape (State#state.ec2_home) ++ "/bin/ec2-describe-instances " ++
-            "-K '" ++ shell_escape (State#state.private_key) ++ "' " ++
-            "-C '" ++ shell_escape (State#state.cert) ++ "' " ++
-            "2>/dev/null",
-  Output = os:cmd (Command),
-
+    
   Group = State#state.group,
   Timeout = State#state.ping_timeout,
-
+  Access = State#state.access,
+  Secret = State#state.secret,
   [ { Node, collect (Key2, Timeout) } ||
     { Node, Key2 } <- 
       [ { Node, start_ping (Node, Timeout) } ||
         { Host, { ok, NamesAndPorts } } <- 
           [ { Host, collect (Key, Timeout) } ||
             { Host, Key } <- [ { Host, start_names (Host, Timeout) } 
-                            || Host <- parse_host_list (Output, Group) ] ],
+                            || Host <- awssign:describe_instances(Group, ?ENDPOINT, ?APIVERSION, Access, Secret) ] ],
         { Name, _ } <- NamesAndPorts,
       Node <- [ a(Name ++ "@" ++ Host) ] ] ].
 
-%RESERVATION	r-817d94e8	038239462139	default
-%INSTANCE	i-72f4021b	ami-81d93ce8	ec2-67-202-6-8.z-1.compute-1.amazonaws.com	domU-12-31-36-00-0C-02.z-1.compute-1.internal	shutting-down	paul	1		m1.small	2007-12-10T22:26:49+0000
-%RESERVATION	r-f0927a99	038239462139	default
-%INSTANCE	i-290dfb40	ami-81d93ce8	ec2-67-202-18-240.compute-1.amazonaws.com	domU-12-31-38-00-38-E6.compute-1.internal	running	paul	0		m1.small	2007-12-15T00:35:20+0000
-%RESERVATION	r-d9927ab0	038239462139	flass
-%INSTANCE	i-310dfb58	ami-81d93ce8	ec2-72-44-51-185.z-1.compute-1.amazonaws.com	domU-12-31-36-00-31-03.z-1.compute-1.internal	running	paul	0		m1.small	2007-12-15T00:37:05+0000
 
-parse_host_list (Output, Group) ->
-  parse_host_list 
-    ([ string:tokens (Line, "\t") || Line <- string:tokens (Output, "\n") ],
-     Group,
-     false,
-     []).
-
-parse_host_list ([], _, _, Acc) -> 
-  Acc;
-parse_host_list ([ [] | Rest ], Group, State, Acc) ->
-  parse_host_list (Rest, Group, State, Acc);
-parse_host_list ([ Line | Rest ], Group, _, Acc) 
-  when hd (Line) =:= "RESERVATION",
-       length (Line) >= 4 ->
-  parse_host_list (Rest, Group, hd (tl (tl (tl (Line)))) =:= Group, Acc);
-parse_host_list ([ Line | Rest ], Group, true, Acc) 
-  when hd (Line) =:= "INSTANCE",
-       length (Line) >= 4 ->
-  parse_host_list (Rest, Group, true, [ hd (tl (tl (tl (tl(Line))))) | Acc ]);
-parse_host_list ([ _ | Rest ], Group, State, Acc) ->
-  parse_host_list (Rest, Group, State, Acc).
-
-shell_escape (String) -> shell_escape (String, []).
-
-shell_escape ([], Acc) -> lists:reverse (Acc);
-shell_escape ([ $' | T ], Acc) -> shell_escape (T, [ $', $\\ | Acc ]);
-shell_escape ([ $\\ | T ], Acc) -> shell_escape (T, [ $\\, $\\ | Acc ]);
-shell_escape ([ H | T ], Acc) -> shell_escape (T, [ H | Acc ]).
 
 start_names (Host, Timeout) ->
   async (fun () -> net_adm:names (a(Host)) end, Timeout).

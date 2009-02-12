@@ -5,6 +5,7 @@
  [{kernel, "%KERNEL_VSN%"},
   {stdlib, "%STDLIB_VSN%"},
   {sasl, "%SASL_VSN%"},
-  {inets, "%SASL_VSN%"},
+  {inets, "%INETS_VSN%"},
+  {crypto, "%CRYPTO_VSN%"},
   {ec2nodefinder, "%VSN%"}]
 }.

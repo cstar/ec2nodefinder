@@ -36,17 +36,13 @@ start (_Type, _Args) ->
     _ -> first_security_group ()
   end,
   { ok, PingTimeout } = application:get_env (ec2nodefinder, ping_timeout_sec),
-  { ok, PrivateKey } = application:get_env (ec2nodefinder, private_key),
-  { ok, Cert } = application:get_env (ec2nodefinder, cert),
-  { ok, Ec2Home } = application:get_env (ec2nodefinder, ec2_home),
-  { ok, JavaHome } = application:get_env (ec2nodefinder, java_home),
-
+  { ok, Access } = application:get_env (ec2nodefinder, access),
+  { ok, Secret } = application:get_env (ec2nodefinder, secret),
+ 
   ec2nodefindersup:start_link (Group, 
                                1000 * PingTimeout,
-                               PrivateKey,
-                               Cert,
-                               Ec2Home,
-                               JavaHome).
+                               Access,
+                               Secret).
 
 %% @hidden
 

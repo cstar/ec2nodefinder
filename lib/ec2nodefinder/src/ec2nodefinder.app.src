@@ -1,16 +1,14 @@
 {application, ec2nodefinder, 
-[{description, "node discovery"}, 
+[{description, "automatic node discovery on EC2"}, 
 {vsn, %VSN%}, 
 {modules, %MODULES%},
 {registered,[ec2nodefinder]}, 
-{applications, [kernel,stdlib, inets]}, 
+{applications, [kernel,stdlib, inets, crypto]}, 
 {mod, {ec2nodefinder,[]}},
 {start_phases, []},
 {env, [
 	{ping_timeout_sec, 10},
-	{private_key, "/tmp/pk-XXXXXXXXXXXXXXXXXX.pem"},
-	{cert, "/tmp/cert-XXXXXXXXXXXXXXXXXX.pem"},
-	{ec2_home, "/usr/local/ec2-api-tools"},
-	{java_home, "/usr/lib/jvm/java-6-openjdk"}
+	{access, ""},
+	{secret, ""}
 ]}
 ]}. 

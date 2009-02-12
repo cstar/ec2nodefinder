@@ -21,32 +21,25 @@ And if you provide your S3 credentials and a bucket name in config.rb, `rake upl
 
 = Running on EC2 =
 
-You need a JDK, the EC2 admin tools and, of course, OTP. For each of the nodes :
-
 I recommend Kevin Smith's AMIs : http://weblog.hypotheticalabs.com/?p=383
 They have everything bundled in. I expect this code to get into the AMI soon.
 
+
+On each of your instances : 
 On Ubuntu : 
 # install erlang
 
-apt-get -y install openjdk-6-jre-headless unzip
-wget http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip
-cd /usr/local/
-unzip ~/ec2-api-tools.zip
-ln -s ec2-api-tools-1.3-30349/ ec2-api-tools
-
-#Upload your EC2 private key and certificate to your instance.
-#Upload your release to your ec2 instance(s) (S3 is a good choice for hosting your release)
+#Upload your release to your ec2 instance(s) 
 sudo erl -boot start_sasl -noshell -eval 'release_handler:unpack_release("<release_name>").' -s init stop
 
-erl -boot start_sasl -name server -kernel inet_dist_listen_min 21000 \
-	inet_dist_listen_max 21005 -s inets -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
+erl -boot start_sasl -sname server -ec2nodefinder access '"<AWS_ACCESS>"' secret '"<AWS_SECRET>"'
+	-s inets -s crypto -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
 
-After a short while (mainly due to JVM startup time) :
-(server@domU-12-31-39-02-65-83.compute-1.internal)3> nodes().
-['server@domU-12-31-39-02-6A-48.compute-1.internal']
 
-Nodes are discovered !
+(server@domU-XXXXXX.compute-1.internal)3> nodes().
+['server@domU-XXXXXXXX.compute-1.internal']
+
+All nodes in the same security group are discovered !
 
 = Final notes =
 
@@ -59,8 +52,7 @@ That caused ec2nodefinder to fetch the public DNS name instead of the private on
 
 - You can quite easily reuse the build system. Add your OTP applications in lib/, they'll be built.
 
-- the tar.gz are at least 3Mb, because the base OTP applications are bundled. This insures compatibility. 
-  But I could find a way to not bundle them, I'd do that.
+
 
 = Thanks =
 To charpi for the Rakefile
