@@ -35,6 +35,9 @@ sudo erl -boot start_sasl -noshell -eval 'release_handler:unpack_release("<relea
 erl -boot start_sasl -sname server -ec2nodefinder access '"<AWS_ACCESS>"' secret '"<AWS_SECRET>"'
 	-s inets -s crypto -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
 
+You can also pass credentials by setting the AMAZON_ACCESS_KEY_ID and AMAZON_SECRET_ACCESS_KEY environment variable
+
+erl -boot start_sasl -sname server -s inets -s crypto -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
 
 (server@domU-XXXXXX.compute-1.internal)3> nodes().
 ['server@domU-XXXXXXXX.compute-1.internal']

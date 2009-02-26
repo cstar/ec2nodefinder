@@ -36,8 +36,8 @@ start (_Type, _Args) ->
     _ -> first_security_group ()
   end,
   { ok, PingTimeout } = application:get_env (ec2nodefinder, ping_timeout_sec),
-  { ok, Access } = application:get_env (ec2nodefinder, access),
-  { ok, Secret } = application:get_env (ec2nodefinder, secret),
+  ID = get(access, "AMAZON_ACCESS_KEY_ID"),
+  Secret = get(secret, "AMAZON_SECRET_ACCESS_KEY"),
  
   ec2nodefindersup:start_link (Group, 
                                1000 * PingTimeout,
@@ -59,7 +59,19 @@ stop (_State) ->
 %-=====================================================================-
 
 %% @private
-
+get(Atom, Env)->
+    case application:get_env(Atom) of
+     {ok, Value} ->
+         Value;
+     undefined ->
+         case os:getenv(Env) of
+     	false ->
+     	    error;
+     	Value ->
+     	    Value
+         end
+    end.
+    
 first_security_group () ->
   Url = "http://169.254.169.254/2007-08-29/meta-data/security-groups",
   case http:request (Url) of
