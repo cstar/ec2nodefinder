@@ -41,7 +41,7 @@ start (_Type, _Args) ->
  
   ec2nodefindersup:start_link (Group, 
                                1000 * PingTimeout,
-                               Access,
+                               ID,
                                Secret).
 
 %% @hidden
