@@ -1,6 +1,4 @@
 #-*-ruby-*-
-require 'config'
-
 require 'rake'
 require 'rake/clean'
 require 'rake/loaders/makefile'

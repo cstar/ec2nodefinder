@@ -1,5 +1,21 @@
 # Copyright 2008-2009 Nicolas Charpentier
 # Distributed under BSD licence
+if File.file?('erlang_config.rb') 
+  require 'erlang_config'  
+else
+  puts "erlang_config.rb file is missing."
+  puts "You need to fill it with your local configuration."
+  puts "An sample has been generated for you."
+  File.open("erlang_config.rb",'w') do |file|
+    file.write("ERL_TOP=\"<path to your erlang installation>\"\n")
+    file.write("ERLC_FLAGS=\"\"\n")
+    file.write("ERL_FLAGS=\"\"\n")
+    file.write("USE_EMAKE=false\n")
+    file.write("EMAKE_COMPILE_OPTIONS = []\n")
+  end
+  exit(-1)
+end
+
 def extract_version_information(file, type)
   informations = []
   IO.foreach(file) { |line|
