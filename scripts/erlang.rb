@@ -238,7 +238,7 @@ desc "Installs in local erl repository : #{erlang_home}"
 task :install =>  [:compile] do |t|
   FileList.new('lib/*').each do |dir|
     vsn = extract_version_information("#{dir}/vsn.config","vsn").gsub("\"","")
-    puts "cp -R #{dir} #{erlang_home}/#{dir}-#{vsn}"
+    sh "cp -R #{dir} #{erlang_home}/#{dir}-#{vsn}"
   end
 end
 
