@@ -231,12 +231,7 @@ task :run, :node, :needs => [ :compile ] do |t,args|
   else
     name = bootfiles.select {|v| v["#{args.name}"]} [0]
   end
-  sh "erl -boot #{name} -pa #{paths} -sname #{node} -s start "
-end
-
-desc "Sends release to S3 (presumably for deployment on EC2)"
-task :upload =>  [:erlang_releases] do |t|
-  ERL_RELEASE_ARCHIVES.each do |r| send_to_s3(r) end
+  sh "#{ERL_TOP}/bin/erl -boot #{name} -pa #{paths} -sname #{node} -s start "
 end
 
 desc "Runs EUnit tests"
@@ -246,7 +241,7 @@ task :tests => ERL_BEAM do |t|
 end
 
 def erlang_home
-  @erlang_home||=IO.popen("erl -noinput -noshell -eval 'io:format(code:root_dir()).' -s init stop").readlines[0] 
+  @erlang_home||=IO.popen("#{ERL_TOP}/bin/erl -noinput -noshell -eval 'io:format(code:root_dir()).' -s init stop").readlines[0] 
 end
 
 desc "Installs in local erl repository : #{erlang_home}"
@@ -257,18 +252,4 @@ task :install =>  [:compile] do |t|
   end
 end
 
-def conn
-  @conn ||= S3::AWSAuthConnection.new(AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, S3_SSL)
-end
-
-def send_to_s3(name)
-  puts "sending release #{name} to S3"
-  # put file with default 'private' ACL
-  bytes = nil
-  File.open(name, "rb") { |f| bytes = f.read }  
-  #set the acl as private       
-  headers =  { 'x-amz-acl' => 'private', 'Content-Length' =>  FileTest.size(name).to_s }
-  response =  conn.put(BUCKET, name.split('/').last, bytes, headers).http_response.message
-  puts "finished sending #{name} to S3"
-end
 
