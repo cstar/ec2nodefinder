@@ -1,6 +1,5 @@
 # Copyright 2008-2009 Nicolas Charpentier
 # Distributed under BSD licence
-require 'scripts/s3'
 def extract_version_information(file, type)
   informations = []
   IO.foreach(file) { |line|
