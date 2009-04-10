@@ -7,8 +7,8 @@
 {mod, {ec2nodefinder,[]}},
 {start_phases, []},
 {env, [
-	{ping_timeout_sec, 10},
-	{access, ""},
-	{secret, ""}
+	{ping_timeout_sec, 10}
+%	{access, ""},
+%	{secret, ""}
 ]}
 ]}. 

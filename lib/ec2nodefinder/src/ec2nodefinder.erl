@@ -28,7 +28,7 @@ discover () ->
 start () ->
     inets:start(),
     crypto:start(),
-  application:start (ec2nodefinder).
+    application:start (ec2nodefinder).
 
 %% @hidden
 
@@ -38,9 +38,8 @@ start (_Type, _Args) ->
     _ -> first_security_group ()
   end,
   { ok, PingTimeout } = application:get_env (ec2nodefinder, ping_timeout_sec),
-  ID = get(access, "AMAZON_ACCESS_KEY_ID"),
-  Secret = get(secret, "AMAZON_SECRET_ACCESS_KEY"),
- 
+  ID = get_p(access, "AMAZON_ACCESS_KEY_ID"),
+  Secret = get_p(secret, "AMAZON_SECRET_ACCESS_KEY"),
   ec2nodefindersup:start_link (Group, 
                                1000 * PingTimeout,
                                ID,
@@ -61,8 +60,8 @@ stop (_State) ->
 %-=====================================================================-
 
 %% @private
-get(Atom, Env)->
-    case application:get_env(Atom) of
+get_p(Atom, Env)->
+    case application:get_env(?MODULE,Atom) of
      {ok, Value} ->
          Value;
      undefined ->
