@@ -26,6 +26,8 @@ discover () ->
 %% @hidden
 
 start () ->
+    inets:start(),
+    crypto:start(),
   application:start (ec2nodefinder).
 
 %% @hidden
