@@ -61,7 +61,7 @@ stop (_State) ->
 
 %% @private
 get_p(Atom, Env)->
-    case application:get_env(?MODULE,Atom) of
+    case application:get_env(ec2nodefinder,Atom) of
      {ok, Value} ->
          Value;
      undefined ->

@@ -1,7 +1,0 @@
-%% -*- erlang -*-
-%% Copyright (c) 2009 Eric Cestari
-main(EbinDirectories) -> 
-	code:add_paths(EbinDirectories),
-	lists:map(fun(Dir) ->
-		eunit:test({dir,Dir}, [verbose])
-	end, EbinDirectories).
