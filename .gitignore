@@ -1,4 +1,4 @@
-ebin
+ebin/*.beam
 erl_crash.dump
 .depend_erlang.mf
 distribs/

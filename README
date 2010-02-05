@@ -7,60 +7,8 @@ New BSD license (http://www.opensource.org/licenses/bsd-license.php) as the orig
 
 = Building =
 
-You need ruby 1.8.6 or 1.8.7, OTP R12B5 and rake on the building machine.
-
-Edit the config.rb file to match your installation.
-
-Edit lib/ec2nodefinder/src/ec2nodefinder.app.src with the appropriate parameters.
-
-Of course you can set them later or pass them on the command line when starting the VM on your EC2 instance.
-
-rake in the main directory will provide you with a tar.gz in the distribs/ folder
-
-And if you provide your S3 credentials and a bucket name in config.rb, `rake upload` will send your release to S3.
-
-= Running on EC2 =
-
-I recommend Kevin Smith's AMIs : http://weblog.hypotheticalabs.com/?p=383
-They have everything bundled in. I expect this code to get into the AMI soon.
-
-
-On each of your instances : 
-On Ubuntu : 
-# install erlang
-
-#Upload your release to your ec2 instance(s) 
-sudo erl -boot start_sasl -noshell -eval 'release_handler:unpack_release("<release_name>").' -s init stop
-
-erl -boot start_sasl -sname server -ec2nodefinder access '"<AWS_ACCESS>"' secret '"<AWS_SECRET>"'
-	-s inets -s crypto -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
-
-You can also pass credentials by setting the AMAZON_ACCESS_KEY_ID and AMAZON_SECRET_ACCESS_KEY environment variable
-
-erl -boot start_sasl -sname server -s inets -s crypto -setcookie 'XXXXXXXXXXX' -s ec2nodefinder
-
-(server@domU-XXXXXX.compute-1.internal)3> nodes().
-['server@domU-XXXXXXXX.compute-1.internal']
-
-All nodes in the same security group are discovered !
-
-= Final notes =
-
-- I want to use charpi's Rakefile (http://charpi.net/blog/). It's very good but meant to reorganize the files 
-- There's a bug in the 0.0.8 release, which prevented ec2nodefinder from working properly :
-in ec2nodefindersrv.erl:143, there's one tl() missing. 
-That caused ec2nodefinder to fetch the public DNS name instead of the private one.
-
-- I also added the app.src file for easy configuration.
-
-- You can quite easily reuse the build system. Add your OTP applications in lib/, they'll be built.
-
-
-
-= Thanks =
-To charpi for the Rakefile
-To the dukes of erl for the code !
-
+./rebar compile
+./rebar install
 
 ------
 Eric Cestari
