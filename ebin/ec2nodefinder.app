@@ -1,6 +1,6 @@
 {application, ec2nodefinder, 
 [{description, "automatic node discovery on EC2"}, 
-{vsn, "0.1.1"}, 
+{vsn, "0.10"}, 
 {modules, [awssign, ec2nodefinder, ec2nodefindersrv, ec2nodefindersup]},
 {registered,[ec2nodefinder]}, 
 {applications, [kernel,stdlib, inets, crypto]}, 
