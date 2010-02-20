@@ -10,6 +10,11 @@ New BSD license (http://www.opensource.org/licenses/bsd-license.php) as the orig
 ./rebar compile
 ./rebar install
 
+= Running = 
+
+You need to set the access and secret values for AWS authentication. 
+OR if you have the AMAZON_ACCESS_KEY_ID and AMAZON_SECRET_ACCESS_KEY environment variables set, ec2nodefinder will automatically pick them up.
+
 ------
 Eric Cestari
 http://www.cestari.info
