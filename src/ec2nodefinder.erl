@@ -75,7 +75,7 @@ get_p(Atom, Env)->
     
 first_security_group () ->
   Url = "http://169.254.169.254/2007-08-29/meta-data/security-groups",
-  case http:request (Url) of
+  case http:request(get, {Url, []}, [{timeout, 300}], []) of
     { ok, { { _HttpVersion, 200, _Reason }, _Headers, Body } } ->
       string:substr (Body, 1, string:cspan (Body, "\n"));
     BadResult ->
